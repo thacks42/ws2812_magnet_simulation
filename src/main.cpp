@@ -327,16 +327,36 @@ void dma1_channel2_isr(void)
 #define ACC_CS_HIGH gpio_set(GPIOA,GPIO3)
 #define ACC_CS_LOW gpio_clear(GPIOA,GPIO3)
 
-volatile int16_t acc_x;
-volatile int16_t acc_y;
-volatile int16_t acc_z;
+int filter(int v) {
+  static int p = 0;
+  static int buf[16];
+  const int coeff[16] = { 2086, 2676, 3312, 3957, 4562, 5075, 5449, 5647, 5647, 5449, 5075, 4562, 3957, 3312, 2676, 2086 };
+  buf[p] = v;
+  int ret = 0;
+  for(int i=0; i<16; i++) {
+    ret += (coeff[i] * buf[(p-i) % 16]);
+  }
+  p = (p+1) % 16;
+  return ret;
+}
+
+int level = 0;
 void exti0_isr(void) {
   ACC_CS_LOW;
   (void) spi_xfer(SPI1, LIS3DH_READ_INC(LIS3DH_OUT_X_L));
-  acc_x = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
-  acc_y = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
-  acc_z = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
+  int16_t x = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
+  int16_t y = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
+  int16_t z = (int16_t)(spi_xfer(SPI1, 0xFF) | (spi_xfer(SPI1, 0xFF) << 8));
   ACC_CS_HIGH;
+
+  (void)x;
+  (void)z;
+
+  gpio_set(GPIOB, 1<<level);
+  level = abs(filter(y)) / (2048 * 65536);
+  if(level < 0) level = 0;
+  if(level > 15) level = 15;
+  gpio_clear(GPIOB, 1<<level);
 
   // TODO: do something with the data
   exti_reset_request(EXTI0);
@@ -367,10 +387,10 @@ accelerometer_up:
   exti_set_trigger(EXTI0, EXTI_TRIGGER_RISING);
   exti_enable_request(EXTI0);
 
-  // select HR bit in CTRL_REG4, set FS to 16g
+  // select HR bit in CTRL_REG4, set FS to 4g
   ACC_CS_LOW;
   (void) spi_xfer(SPI1, LIS3DH_WRITE(LIS3DH_CTRL_REG4));
-  (void) spi_xfer(SPI1, LIS3DH_CTRL_REG4_HR | LIS3DH_CTRL_REG4_FS(3));
+  (void) spi_xfer(SPI1, LIS3DH_CTRL_REG4_HR | LIS3DH_CTRL_REG4_FS(0));
   ACC_CS_HIGH;
 
 #if 0
