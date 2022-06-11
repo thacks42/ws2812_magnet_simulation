@@ -35,16 +35,16 @@ static void rcc_setup_16mhz_hse8mhz(void) {
   rcc_wait_for_sysclk_status(RCC_HSE);
 
   rcc_osc_off(RCC_PLL);
-  rcc_set_pll_configuration(RCC_HSE, RCC_CFGR_PLLMUL_MUL6, RCC_CFGR_PLLDIV_DIV3);
+  rcc_set_pll_configuration(RCC_HSE, RCC_CFGR_PLLMUL_MUL12, RCC_CFGR_PLLDIV_DIV3);
   rcc_osc_on(RCC_PLL);
   rcc_wait_for_osc_ready(RCC_PLL);
   
   rcc_set_sysclk_source(RCC_CFGR_SW_SYSCLKSEL_PLLCLK);
   rcc_wait_for_sysclk_status(RCC_PLL);
 
-  rcc_ahb_frequency = 16000000;
-  rcc_apb1_frequency = 16000000;
-  rcc_apb2_frequency = 16000000;
+  rcc_ahb_frequency = 32000000;
+  rcc_apb1_frequency = 32000000;
+  rcc_apb2_frequency = 32000000;
 }
 
 static void clock_setup(void)
@@ -66,13 +66,13 @@ static void clock_setup(void)
 	rcc_periph_clock_enable(RCC_USART1);
 }
 
-#define TICK_NS (1000/16)
+#define TICK_NS (1000/32)
 #define WS0 (350 / TICK_NS)
 #define WS1 (800 / TICK_NS)
 #define WSP (1300 / TICK_NS)
 #define WSL (20000 / TICK_NS)
 
-#define DMA_BANK_SIZE 40 * 8 * 4
+#define DMA_BANK_SIZE (40 * 8 * 4)
 #define DMA_SIZE (DMA_BANK_SIZE*2)
 static uint8_t dma_data[DMA_SIZE];
 static volatile uint32_t led_data[LED_COUNT];
@@ -396,7 +396,7 @@ accelerometer_up:
 }
 
 void bad_sleep(){
-    for(int i = 0; i < 10000; i++){
+    for(int i = 0; i < 4444; i++){
         __asm__("nop");
     }
 }
