@@ -17,14 +17,14 @@ CPPFILES = main.cpp
 CFLAGS += -Wall
 
 # TODO - you will need to edit these two lines!
-DEVICE=stm32f103c8t6
-OOCD_FILE = board/stm32f103c8_blue_pill.cfg
-OOCD_INTERFACE = stlink-v2.cfg
+DEVICE=stm32l151c8t6
+OOCD_TARGET = stm32l1
+OOCD_INTERFACE = stlink
 
 # You shouldn't have to edit anything below here.
 VPATH += $(SHARED_DIR)
 INCLUDES += $(patsubst %,-I%, . $(SHARED_DIR))
-OPENCM3_DIR=../libopencm3
+OPENCM3_DIR=../../libopencm3
 
 include $(OPENCM3_DIR)/mk/genlink-config.mk
 include rules.mk

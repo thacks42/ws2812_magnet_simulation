@@ -1,5 +1,5 @@
 #pragma once
-#include "fixed_point/fixed_point_math.hpp"
+#include "../fixed_point/fixed_point_math.hpp"
 #include <array>
 
 struct color{
