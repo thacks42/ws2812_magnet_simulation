@@ -1,7 +1,7 @@
 PROJECT = ws2812barlight
 BUILD_DIR = bin
 
-SHARED_DIR = /home/michael/documents/cpp/include
+SHARED_DIR = 
 #CFILES = main.c
 CPPFILES = main.cpp
 #LDLIBS += -lm
